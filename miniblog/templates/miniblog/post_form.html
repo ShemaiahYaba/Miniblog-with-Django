@@ -1,0 +1,103 @@
+<!-- 
+  POST FORM TEMPLATE - Used for both creating new posts and editing existing ones
+  This template is used by both PostCreateView and PostUpdateView
+-->
+{% extends "miniblog/base.html" %}
+
+<!-- 
+  CONDITIONAL PAGE TITLE - Different titles for create vs edit
+  {% if object %} checks if we're editing an existing post (object exists)
+-->
+{% block title %}
+{% if object %}
+Edit Post - MiniBlog  <!-- Editing existing post -->
+{% else %}
+New Post - MiniBlog   <!-- Creating new post -->
+{% endif %}
+{% endblock %}
+
+<!-- Main content block -->
+{% block content %}
+<!-- 
+  CENTERED FORM LAYOUT - Uses Bootstrap grid to center the form
+  col-md-8 makes the form take 8/12 columns on medium+ screens
+-->
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <!-- FORM CARD - Bootstrap card component for clean form presentation -->
+    <div class="card">
+      <div class="card-header">
+        <!-- 
+          DYNAMIC FORM TITLE - Changes based on create vs edit mode
+          Same conditional logic as the page title
+        -->
+        <h2 class="text-center">
+          {% if object %} Edit Post {% else %} Create New Post {% endif %}
+        </h2>
+      </div>
+      <div class="card-body">
+        <!-- 
+          POST FORM - Handles both creation and editing
+          Django's CreateView and UpdateView automatically handle form processing
+        -->
+        <form method="POST">
+          {% csrf_token %}  <!-- Required CSRF protection for POST forms -->
+          
+          <!-- TITLE FIELD - Post title input -->
+          <div class="mb-3">
+            <!-- 
+              FORM LABEL - Properly associated with input field
+              {{ form.title.id_for_label }} generates the correct 'for' attribute
+            -->
+            <label for="{{ form.title.id_for_label }}" class="form-label"
+              >Title</label
+            >
+            <!-- 
+              TITLE INPUT - Rendered from PostForm
+              Django automatically includes Bootstrap classes from form definition
+            -->
+            {{ form.title }} 
+            
+            <!-- 
+              FIELD VALIDATION ERRORS - Show title-specific errors
+              Only displayed if there are validation errors for this field
+            -->
+            {% if form.title.errors %}
+            <div class="alert alert-danger mt-2">{{ form.title.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <!-- CONTENT FIELD - Post content textarea -->
+          <div class="mb-3">
+            <!-- CONTENT LABEL -->
+            <label for="{{ form.content.id_for_label }}" class="form-label"
+              >Content</label
+            >
+            <!-- 
+              CONTENT TEXTAREA - Large text input for post body
+              Automatically includes Bootstrap styling from PostForm
+            -->
+            {{ form.content }} 
+            
+            <!-- CONTENT VALIDATION ERRORS -->
+            {% if form.content.errors %}
+            <div class="alert alert-danger mt-2">{{ form.content.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <!-- SUBMIT BUTTON CONTAINER - Full-width button -->
+          <div class="d-grid">
+            <!-- 
+              DYNAMIC SUBMIT BUTTON - Text changes based on create vs edit
+              Button submits form to appropriate view (CreateView or UpdateView)
+            -->
+            <button type="submit" class="btn btn-primary">
+              {% if object %} Update Post {% else %} Create Post {% endif %}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,175 @@
+<!-- 
+  POST LIST TEMPLATE - Homepage that displays all blog posts in a paginated list
+  This template extends base.html and fills the content block
+-->
+{% extends 'miniblog/base.html' %}
+
+<!-- Override the page title in the browser tab -->
+{% block title %}Home - MiniBlog{% endblock %}
+
+<!-- Main content block that gets inserted into base.html -->
+{% block content %}
+<!-- 
+  TWO-COLUMN LAYOUT - Main content on left, sidebar on right
+  Uses Bootstrap grid system for responsive design
+-->
+<div class="row">
+  <!-- MAIN CONTENT COLUMN - 8/12 columns on medium+ screens -->
+  <div class="col-md-8">
+    <h1 class="mb-4">Latest Posts</h1>
+    
+    <!-- 
+      CONDITIONAL CONTENT - Check if there are any posts to display
+      Django template tag: {% if posts %} checks if posts list is not empty
+    -->
+    {% if posts %}
+      <!-- 
+        POST LOOP - Iterate through each post and display it as a card
+        Django template tag: {% for post in posts %} loops through the posts list
+      -->
+      {% for post in posts %}
+        <!-- INDIVIDUAL POST CARD - Bootstrap card component for each post -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <!-- POST HEADER - Title and date in a flex layout -->
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title">
+                <!-- 
+                  POST TITLE LINK - Links to the detailed view of this post
+                  {% url 'post-detail' post.pk %} generates URL using post's primary key
+                -->
+                <a href="{% url 'post-detail' post.pk %}" class="text-decoration-none">
+                  {{ post.title }}  <!-- Display the post title -->
+                </a>
+              </h5>
+              <!-- 
+                POST DATE - Display formatted publication date
+                |date:"M d, Y" is a Django template filter that formats the date
+              -->
+              <small class="text-muted">{{ post.date_posted|date:"M d, Y" }}</small>
+            </div>
+            
+            <!-- 
+              POST EXCERPT - Show first 30 words of the post content
+              |truncatewords:30 is a Django filter that limits word count
+            -->
+            <p class="card-text">{{ post.content|truncatewords:30 }}</p>
+            
+            <!-- POST FOOTER - Author info and read more button -->
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted">
+                By 
+                <!-- 
+                  AUTHOR LINK - Links to page showing all posts by this author
+                  Uses the author's username as URL parameter
+                -->
+                <a href="{% url 'user-posts' post.author.username %}" class="text-decoration-none">
+                  {{ post.author.username }}  <!-- Display author's username -->
+                </a>
+              </small>
+              <!-- READ MORE BUTTON - Links to full post view -->
+              <a href="{% url 'post-detail' post.pk %}" class="btn btn-outline-primary btn-sm">
+                Read More
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      
+      <!-- 
+        PAGINATION CONTROLS - Only show if there are multiple pages
+        is_paginated is automatically provided by Django's ListView when paginate_by is set
+      -->
+      {% if is_paginated %}
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center">
+            <!-- PREVIOUS PAGE BUTTON -->
+            {% if page_obj.has_previous %}
+              <!-- Show active previous button if there's a previous page -->
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+              </li>
+            {% else %}
+              <!-- Show disabled previous button if we're on first page -->
+              <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+              </li>
+            {% endif %}
+            
+            <!-- 
+              PAGE NUMBERS - Loop through all available page numbers
+              page_obj.paginator.page_range provides list of all page numbers
+            -->
+            {% for num in page_obj.paginator.page_range %}
+              {% if num == page_obj.number %}
+                <!-- Current page - highlighted and not clickable -->
+                <li class="page-item active">
+                  <span class="page-link">{{ num }}</span>
+                </li>
+              {% else %}
+                <!-- Other pages - clickable links -->
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+            
+            <!-- NEXT PAGE BUTTON -->
+            {% if page_obj.has_next %}
+              <!-- Show active next button if there's a next page -->
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+              </li>
+            {% else %}
+              <!-- Show disabled next button if we're on last page -->
+              <li class="page-item disabled">
+                <span class="page-link">Next</span>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+      
+    {% else %}
+      <!-- 
+        EMPTY STATE - Shown when there are no posts in the database
+        Provides helpful call-to-action based on user's authentication status
+      -->
+      <div class="text-center py-5">
+        <h3 class="text-muted">No posts yet</h3>
+        <p class="text-muted">Be the first to create a post!</p>
+        <!-- 
+          CONDITIONAL CALL-TO-ACTION - Different buttons for logged-in vs anonymous users
+        -->
+        {% if user.is_authenticated %}
+          <!-- Logged-in users can create posts immediately -->
+          <a href="{% url 'post-create' %}" class="btn btn-primary">Create Your First Post</a>
+        {% else %}
+          <!-- Anonymous users need to register first -->
+          <a href="{% url 'register' %}" class="btn btn-primary">Register to Create Posts</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+  
+  <!-- SIDEBAR COLUMN - 4/12 columns on medium+ screens -->
+  <div class="col-md-4">
+    <!-- ABOUT WIDGET - Information card about the blog -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">About MiniBlog</h5>
+      </div>
+      <div class="card-body">
+        <p class="card-text">Welcome to MiniBlog! Share your thoughts and connect with others through our simple blogging platform.</p>
+        <!-- 
+          CONDITIONAL JOIN BUTTON - Only show to anonymous users
+          Logged-in users don't need to see registration prompt
+        -->
+        {% if not user.is_authenticated %}
+          <a href="{% url 'register' %}" class="btn btn-primary btn-sm">Join Us</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

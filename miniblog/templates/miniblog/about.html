@@ -1,0 +1,82 @@
+<!-- 
+  ABOUT PAGE TEMPLATE - Static informational page about the blog
+  Provides information about the platform and encourages user engagement
+-->
+{% extends "miniblog/base.html" %}
+
+<!-- Page title for browser tab -->
+{% block title %}About - MiniBlog{% endblock %}
+
+<!-- Main content block -->
+{% block content %}
+<!-- 
+  CENTERED CONTENT LAYOUT - Wider than forms but not full width
+  Uses 8/12 columns for comfortable reading width
+-->
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <!-- ABOUT CONTENT CARD - Clean card layout for the information -->
+    <div class="card">
+      <div class="card-header">
+        <!-- MAIN PAGE HEADING -->
+        <h1 class="text-center">About MiniBlog</h1>
+      </div>
+      <div class="card-body">
+        <!-- 
+          LEAD PARAGRAPH - Introduction with Bootstrap lead class
+          Provides larger, emphasized text for the main description
+        -->
+        <p class="lead">
+          Welcome to MiniBlog, a simple and elegant blogging platform where you
+          can share your thoughts and connect with others.
+        </p>
+
+        <!-- FEATURES SECTION - Highlights platform capabilities -->
+        <h3>Features</h3>
+        <!-- 
+          FEATURE LIST - Bootstrap list group for clean presentation
+          list-group-flush removes borders for seamless card integration
+        -->
+        <ul class="list-group list-group-flush mb-4">
+          <li class="list-group-item">Create and manage your own blog posts</li>
+          <li class="list-group-item">
+            Engage with other users through comments
+          </li>
+          <li class="list-group-item">User-friendly interface</li>
+          <li class="list-group-item">Secure user authentication</li>
+          <li class="list-group-item">Responsive design for all devices</li>
+        </ul>
+
+        <!-- CALL-TO-ACTION SECTION - Encourages user engagement -->
+        <h3>Get Started</h3>
+        <p>
+          Ready to start sharing your thoughts? 
+          <!-- 
+            CONDITIONAL CALL-TO-ACTION - Different actions for different user states
+            Provides appropriate next steps based on authentication status
+          -->
+          {% if user.is_authenticated %}
+          <!-- 
+            LOGGED-IN USER ACTION - Direct link to create content
+            Users can immediately start creating posts
+          -->
+          <a href="{% url 'post-create' %}" class="btn btn-primary"
+            >Create Your First Post</a
+          >
+          {% else %}
+          <!-- 
+            ANONYMOUS USER ACTIONS - Registration and login options
+            Provides both primary (register) and secondary (login) actions
+          -->
+          <a href="{% url 'register' %}" class="btn btn-primary"
+            >Register Now</a
+          >
+          or
+          <a href="{% url 'login' %}" class="btn btn-outline-primary">Login</a>
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

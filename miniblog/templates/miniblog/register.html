@@ -1,0 +1,106 @@
+<!-- 
+  USER REGISTRATION TEMPLATE - Allows new users to create accounts
+  Uses Django's UserCreationForm with additional email field
+-->
+{% extends "miniblog/base.html" %}
+
+<!-- Page title for browser tab -->
+{% block title %}Register - MiniBlog{% endblock %}
+
+<!-- Main content block -->
+{% block content %}
+<!-- 
+  CENTERED REGISTRATION FORM - Narrower than post forms (6/12 columns)
+  Registration forms typically need less width than content forms
+-->
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <!-- REGISTRATION CARD - Clean card layout for the form -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="text-center">Register</h2>
+      </div>
+      <div class="card-body">
+        <!-- 
+          REGISTRATION FORM - Processes user registration
+          Handled by the register view function
+        -->
+        <form method="POST">
+          {% csrf_token %}  <!-- CSRF protection required -->
+          
+          <!-- USERNAME FIELD - Unique identifier for the user -->
+          <div class="mb-3">
+            <label for="{{ form.username.id_for_label }}" class="form-label"
+              >Username</label
+            >
+            <!-- Username input field from UserRegisterForm -->
+            {{ form.username }} 
+            
+            <!-- Username validation errors (uniqueness, length, etc.) -->
+            {% if form.username.errors %}
+            <div class="alert alert-danger">{{ form.username.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <!-- EMAIL FIELD - Additional field not in default Django form -->
+          <div class="mb-3">
+            <label for="{{ form.email.id_for_label }}" class="form-label"
+              >Email</label
+            >
+            <!-- Email input field (custom addition to UserCreationForm) -->
+            {{ form.email }} 
+            
+            <!-- Email validation errors (format, required, etc.) -->
+            {% if form.email.errors %}
+            <div class="alert alert-danger">{{ form.email.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <!-- PASSWORD FIELD - Primary password input -->
+          <div class="mb-3">
+            <label for="{{ form.password1.id_for_label }}" class="form-label"
+              >Password</label
+            >
+            <!-- Password input field with Django's built-in validation -->
+            {{ form.password1 }} 
+            
+            <!-- Password validation errors (strength, length, etc.) -->
+            {% if form.password1.errors %}
+            <div class="alert alert-danger">{{ form.password1.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <!-- PASSWORD CONFIRMATION FIELD - Ensures passwords match -->
+          <div class="mb-3">
+            <label for="{{ form.password2.id_for_label }}" class="form-label"
+              >Confirm Password</label
+            >
+            <!-- Password confirmation field -->
+            {{ form.password2 }} 
+            
+            <!-- Password confirmation errors (mismatch, etc.) -->
+            {% if form.password2.errors %}
+            <div class="alert alert-danger">{{ form.password2.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <!-- SUBMIT BUTTON - Full-width registration button -->
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Register</button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- 
+        CARD FOOTER - Link to login for existing users
+        Provides navigation between registration and login forms
+      -->
+      <div class="card-footer text-center">
+        <small class="text-muted">
+          Already have an account? <a href="{% url 'login' %}">Login here</a>
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

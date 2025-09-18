@@ -1,0 +1,183 @@
+<!-- 
+  BASE TEMPLATE - This is the foundation template that all other templates extend
+  It contains the common HTML structure, navigation, and styling that appears on every page
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Basic HTML meta tags for proper rendering -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Dynamic page title - child templates can override this block -->
+    <title>{% block title %}MiniBlog{% endblock %}</title>
+    
+    <!-- Bootstrap CSS framework for responsive design and styling -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    
+    <!-- Custom CSS styles for our blog -->
+    <style>
+      body {
+        padding-top: 5rem;  /* Space for fixed navigation bar */
+        background-color: #f8f9fa;  /* Light gray background */
+      }
+      .navbar {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Subtle shadow under navbar */
+      }
+      .card {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);  /* Subtle shadow for cards */
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 
+      NAVIGATION BAR - Fixed at top of page, contains site branding and main navigation
+      Uses Bootstrap classes for responsive design and dark theme
+    -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <!-- Site logo/brand - links to homepage -->
+        <a class="navbar-brand" href="{% url 'post-list' %}">MiniBlog</a>
+        
+        <!-- Mobile menu toggle button (hamburger menu) -->
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Collapsible navigation menu -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <!-- Left side navigation links -->
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <!-- Home link with active state detection -->
+              <a
+                class="nav-link {% if request.resolver_match.url_name == 'post-list' %}active{% endif %}"
+                href="{% url 'post-list' %}"
+                >Home</a
+              >
+            </li>
+            <li class="nav-item">
+              <!-- About link with active state detection -->
+              <a
+                class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}"
+                href="{% url 'about' %}"
+                >About</a
+              >
+            </li>
+          </ul>
+          <!-- Right side navigation - changes based on user authentication status -->
+          <ul class="navbar-nav">
+            <!-- 
+              CONDITIONAL NAVIGATION - Shows different links for logged-in vs anonymous users
+              Django template tag: {% if user.is_authenticated %} checks if user is logged in
+            -->
+            {% if user.is_authenticated %}
+              <!-- Links shown only to logged-in users -->
+              <li class="nav-item">
+                <!-- Create new post link -->
+                <a
+                  class="nav-link {% if request.resolver_match.url_name == 'post-create' %}active{% endif %}"
+                  href="{% url 'post-create' %}"
+                  >New Post</a
+                >
+              </li>
+              <li class="nav-item">
+                <!-- User's own posts link - uses current user's username -->
+                <a
+                  class="nav-link {% if request.resolver_match.url_name == 'user-posts' and request.resolver_match.kwargs.username == user.username %}active{% endif %}"
+                  href="{% url 'user-posts' user.username %}"
+                  >My Posts</a
+                >
+              </li>
+              <li class="nav-item">
+                <!-- Logout link -->
+                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+              </li>
+            {% else %}
+              <!-- Links shown only to anonymous (not logged in) users -->
+              <li class="nav-item">
+                <!-- Login link -->
+                <a
+                  class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}"
+                  href="{% url 'login' %}"
+                  >Login</a
+                >
+              </li>
+              <li class="nav-item">
+                <!-- Registration link -->
+                <a
+                  class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}"
+                  href="{% url 'register' %}"
+                  >Register</a
+                >
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 
+      MAIN CONTENT AREA - Contains the page-specific content
+      Uses Bootstrap container for responsive layout with padding
+    -->
+    <main class="container py-4">
+      <!-- 
+        FLASH MESSAGES - Display temporary messages to users (success, error, info, warning)
+        These are set in views using Django's messages framework
+      -->
+      {% if messages %} 
+        {% for message in messages %}
+        <div
+          class="alert alert-{{ message.tags }} alert-dismissible fade show"
+          role="alert"
+        >
+          {{ message }}  <!-- The actual message text -->
+          <!-- Close button for dismissing the message -->
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+        {% endfor %} 
+      {% endif %}
+
+      <!-- 
+        CONTENT BLOCK - This is where child templates insert their specific content
+        Each page template extends this base and fills this block with their HTML
+      -->
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- 
+      FOOTER - Appears at bottom of every page
+      Contains copyright information and uses current year
+    -->
+    <footer class="bg-dark text-light mt-5">
+      <div class="container py-3">
+        <div class="text-center">
+          <p class="mb-0">
+            <!-- Django template tag {% now "Y" %} displays current year -->
+            &copy; {% now "Y" %} MiniBlog. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- 
+      BOOTSTRAP JAVASCRIPT - Required for interactive components
+      Includes dropdowns, modals, tooltips, and mobile menu functionality
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

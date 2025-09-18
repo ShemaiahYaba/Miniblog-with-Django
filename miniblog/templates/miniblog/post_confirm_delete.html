@@ -1,0 +1,65 @@
+<!-- 
+  POST DELETE CONFIRMATION TEMPLATE - Confirms post deletion before proceeding
+  Used by PostDeleteView to prevent accidental deletions
+-->
+{% extends "miniblog/base.html" %}
+
+<!-- Page title for browser tab -->
+{% block title %}Delete Post - MiniBlog{% endblock %}
+
+<!-- Main content block -->
+{% block content %}
+<!-- 
+  CENTERED CONFIRMATION DIALOG - Moderate width for confirmation message
+  Uses 6/12 columns to provide enough space for content without being too wide
+-->
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <!-- CONFIRMATION CARD - Clean card layout for the confirmation dialog -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="text-center">Delete Post</h2>
+      </div>
+      <div class="card-body">
+        <!-- 
+          DELETE CONFIRMATION FORM - Requires POST to actually delete
+          Django's DeleteView requires POST method for security
+        -->
+        <form method="POST">
+          {% csrf_token %}  <!-- CSRF protection required for destructive actions -->
+          
+          <!-- 
+            CONFIRMATION MESSAGE - Shows the specific post title
+            {{ object.title }} displays the title of the post being deleted
+          -->
+          <p class="text-center">
+            Are you sure you want to delete "{{ object.title }}"?
+          </p>
+          
+          <!-- 
+            ACTION BUTTONS - Delete and Cancel options
+            Uses flexbox for centered horizontal layout with gap
+          -->
+          <div class="d-flex justify-content-center gap-2">
+            <!-- 
+              DELETE BUTTON - Danger styling (red) to indicate destructive action
+              Submits the form to actually delete the post
+            -->
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            
+            <!-- 
+              CANCEL BUTTON - Secondary styling, links back to post detail
+              Allows user to abort the deletion process
+            -->
+            <a
+              href="{% url 'post-detail' object.pk %}"
+              class="btn btn-secondary"
+              >Cancel</a
+            >
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,150 @@
+<!-- 
+  USER POSTS TEMPLATE - Displays all posts by a specific user
+  Similar to post_list.html but filtered by author
+-->
+{% extends "miniblog/base.html" %}
+
+<!-- 
+  DYNAMIC PAGE TITLE - Shows the username in the browser tab
+  view.kwargs.username accesses the username parameter from the URL
+-->
+{% block title %}Posts by {{ view.kwargs.username }} - MiniBlog{% endblock %}
+
+<!-- Main content block -->
+{% block content %}
+<!-- PAGE HEADER - Shows whose posts we're viewing -->
+<h1 class="mb-4">Posts by {{ view.kwargs.username }}</h1>
+
+<!-- 
+  USER POSTS LOOP - Display all posts by the specified user
+  Similar structure to post_list.html but with author-specific features
+-->
+{% for post in posts %}
+<!-- INDIVIDUAL POST ARTICLE - Each post displayed as a card -->
+<article class="card mb-4">
+  <div class="card-body">
+    <!-- POST HEADER - Title and owner actions -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h2 class="card-title">
+        <!-- 
+          POST TITLE LINK - Links to detailed view
+          Uses dark text color for better readability as main heading
+        -->
+        <a
+          href="{% url 'post-detail' post.pk %}"
+          class="text-decoration-none text-dark"
+        >
+          {{ post.title }}  <!-- Display post title -->
+        </a>
+      </h2>
+      
+      <!-- 
+        OWNER ACTIONS - Edit/Delete buttons only for post owner
+        Allows users to manage their own posts from this view
+      -->
+      {% if post.author == user %}
+      <div class="btn-group">
+        <!-- EDIT BUTTON - Smaller size for compact layout -->
+        <a
+          href="{% url 'post-update' post.pk %}"
+          class="btn btn-sm btn-outline-secondary"
+          >Edit</a
+        >
+        <!-- DELETE BUTTON - Smaller size for compact layout -->
+        <a
+          href="{% url 'post-delete' post.pk %}"
+          class="btn btn-sm btn-outline-danger"
+          >Delete</a
+        >
+      </div>
+      {% endif %}
+    </div>
+    
+    <!-- 
+      POST METADATA - Publication date
+      Author name omitted since all posts are by the same user
+    -->
+    <div class="text-muted mb-2">
+      <small>Posted on {{ post.date_posted|date:"F d, Y" }}</small>
+    </div>
+    
+    <!-- 
+      POST EXCERPT - Longer excerpt than homepage (50 words vs 30)
+      Gives more context since users are specifically viewing this author
+    -->
+    <p class="card-text">{{ post.content|truncatewords:50 }}</p>
+    
+    <!-- READ MORE BUTTON - Links to full post view -->
+    <a href="{% url 'post-detail' post.pk %}" class="btn btn-primary"
+      >Read More</a
+    >
+  </div>
+</article>
+{% empty %}
+<!-- 
+  EMPTY STATE - Shown when user has no posts
+  {% empty %} handles the case when the posts list is empty
+-->
+<div class="alert alert-info">No posts available from this user.</div>
+{% endfor %}
+
+<!-- 
+  ADVANCED PAGINATION - More sophisticated than homepage pagination
+  Includes First/Last buttons and smart page number display
+-->
+{% if is_paginated %}
+<nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+    <!-- FIRST/PREVIOUS BUTTONS - Only show if not on first page -->
+    {% if page_obj.has_previous %}
+    <!-- FIRST PAGE BUTTON - Jump to beginning -->
+    <li class="page-item">
+      <a class="page-link" href="?page=1">First</a>
+    </li>
+    <!-- PREVIOUS PAGE BUTTON -->
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}"
+        >Previous</a
+      >
+    </li>
+    {% endif %}
+    
+    <!-- 
+      SMART PAGE NUMBERS - Only show pages near current page
+      Complex logic to avoid showing too many page numbers
+      Shows pages within 3 of current page: current-3 to current+3
+    -->
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+        <!-- CURRENT PAGE - Highlighted and not clickable -->
+        <li class="page-item active">
+          <span class="page-link">{{ num }}</span>
+        </li>
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <!-- 
+          NEARBY PAGES - Only show pages within range
+          |add:'-3' and |add:'3' create a window around current page
+        -->
+        <li class="page-item">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+    
+    <!-- NEXT/LAST BUTTONS - Only show if not on last page -->
+    {% if page_obj.has_next %}
+    <!-- NEXT PAGE BUTTON -->
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+    </li>
+    <!-- LAST PAGE BUTTON - Jump to end -->
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}"
+        >Last</a
+      >
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %} 
+{% endblock %}

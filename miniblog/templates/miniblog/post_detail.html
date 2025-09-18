@@ -1,0 +1,163 @@
+<!-- 
+  POST DETAIL TEMPLATE - Displays a single blog post with full content and comments
+  This template shows the complete post and allows users to add comments
+-->
+{% extends "miniblog/base.html" %}
+
+<!-- 
+  DYNAMIC PAGE TITLE - Uses the post title in the browser tab
+  {{ object.title }} refers to the Post object passed from PostDetailView
+-->
+{% block title %}{{ object.title }} - MiniBlog{% endblock %}
+
+<!-- Main content block -->
+{% block content %}
+<!-- 
+  MAIN POST CONTENT - Article element for semantic HTML
+  Contains the full blog post with title, metadata, and content
+-->
+<article class="card mb-4">
+  <div class="card-body">
+    <!-- POST HEADER - Title and action buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <!-- POST TITLE - Main heading for the post -->
+      <h1 class="card-title">{{ object.title }}</h1>
+      
+      <!-- 
+        AUTHOR ACTIONS - Edit/Delete buttons only shown to post author
+        {% if object.author == user %} checks if current user owns this post
+      -->
+      {% if object.author == user %}
+      <div class="btn-group">
+        <!-- EDIT BUTTON - Links to post update form -->
+        <a
+          href="{% url 'post-update' object.pk %}"
+          class="btn btn-outline-secondary"
+          >Edit</a
+        >
+        <!-- DELETE BUTTON - Links to delete confirmation page -->
+        <a
+          href="{% url 'post-delete' object.pk %}"
+          class="btn btn-outline-danger"
+          >Delete</a
+        >
+      </div>
+      {% endif %}
+    </div>
+    
+    <!-- 
+      POST METADATA - Author and publication date information
+      Provides context about when and who published the post
+    -->
+    <div class="text-muted mb-3">
+      Posted by
+      <!-- 
+        AUTHOR LINK - Links to page showing all posts by this author
+        Allows readers to discover more content from the same author
+      -->
+      <a
+        href="{% url 'user-posts' object.author.username %}"
+        class="text-decoration-none"
+      >
+        {{ object.author.username }}  <!-- Display author's username -->
+      </a>
+      <!-- 
+        FORMATTED DATE - Shows when the post was published
+        |date:"F d, Y" formats as "January 15, 2024"
+      -->
+      on {{ object.date_posted|date:"F d, Y" }}
+    </div>
+    
+    <!-- 
+      POST CONTENT - The main body text of the blog post
+      {{ object.content }} displays the full post content without truncation
+    -->
+    <p class="card-text">{{ object.content }}</p>
+  </div>
+</article>
+
+<!-- 
+  COMMENTS SECTION - Interactive area for user comments
+  Includes comment form (for logged-in users) and list of existing comments
+-->
+<div class="card mb-4">
+  <div class="card-header">
+    <h3>Comments</h3>
+  </div>
+  <div class="card-body">
+    <!-- 
+      COMMENT FORM - Only shown to authenticated users
+      Anonymous users see a login prompt instead
+    -->
+    {% if user.is_authenticated %}
+    <!-- 
+      COMMENT SUBMISSION FORM - Posts to add-comment view
+      Uses POST method for data submission and includes CSRF protection
+    -->
+    <form method="POST" action="{% url 'add-comment' object.pk %}" class="mb-4">
+      {% csrf_token %}  <!-- Required for POST forms in Django -->
+      <div class="mb-3">
+        <!-- 
+          COMMENT TEXTAREA - Rendered from CommentForm
+          comment_form is passed from the view's get_context_data method
+        -->
+        {{ comment_form.content }} 
+        
+        <!-- 
+          FORM VALIDATION ERRORS - Display any errors for the content field
+          Shows validation messages if comment submission fails
+        -->
+        {% if comment_form.content.errors %}
+        <div class="alert alert-danger mt-2">
+          {{ comment_form.content.errors }}
+        </div>
+        {% endif %}
+      </div>
+      <!-- SUBMIT BUTTON - Submits the comment form -->
+      <button type="submit" class="btn btn-primary">Add Comment</button>
+    </form>
+    {% else %}
+    <!-- 
+      LOGIN PROMPT - Shown to anonymous users
+      Encourages user registration/login to participate in discussions
+    -->
+    <div class="alert alert-info">
+      Please <a href="{% url 'login' %}">login</a> to add comments.
+    </div>
+    {% endif %}
+
+    <!-- 
+      COMMENTS LIST - Display all comments for this post
+      Uses object.comments.all to get related comments via ForeignKey relationship
+    -->
+    {% for comment in object.comments.all %}
+    <!-- INDIVIDUAL COMMENT - Each comment displayed as a small card -->
+    <div class="card mb-2">
+      <div class="card-body">
+        <!-- COMMENT HEADER - Author name and date -->
+        <div class="d-flex justify-content-between">
+          <div>
+            <!-- COMMENT AUTHOR - Display commenter's username -->
+            <strong>{{ comment.author.username }}</strong>
+            <!-- COMMENT DATE - When the comment was posted -->
+            <small class="text-muted">
+              - {{ comment.date_posted|date:"F d, Y" }}
+            </small>
+          </div>
+        </div>
+        <!-- COMMENT CONTENT - The actual comment text -->
+        <p class="card-text mt-2">{{ comment.content }}</p>
+      </div>
+    </div>
+    {% empty %}
+    <!-- 
+      EMPTY STATE - Shown when there are no comments yet
+      {% empty %} is Django's template tag for handling empty loops
+    -->
+    <div class="alert alert-info">
+      No comments yet. Be the first to comment!
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
