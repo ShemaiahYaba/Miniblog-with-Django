@@ -151,4 +151,4 @@ This project is open source and available under the [MIT License](LICENSE).
 ---
 
 Built with ❤️ and Django by [Shemaiah Yaba-Shiaka]  
-Connect with me on [Meet Yaba-Shiaka](https://meet.yabashiaka.com)
+Connect with me on [Meet Yaba-Shiaka](https://meet-yabashiaka.vercel.app)
